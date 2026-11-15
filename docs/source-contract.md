@@ -10,4 +10,4 @@ generation=2 发布新快照，mode=publishing 使 schema 文件暂未完成发�
 
 ## 本地演练控制
 
-`GET /_health` 返回服务健康状态；`GET /_audit` 仅返回请求路径、方法和体积，不记录凭据。`POST /_control` 接收 JSON，可调整 generation、mode、clock。控制端点只服务于本地演练，不是资料接口，也不是浏览器业务操作入口。每次重新启动服务都会恢复初始数据；生产接入时不部署此控制面。
+`GET /_health` 返回服务健康状态；`GET /_audit` 仅返回请求路径、方法和体积，不记录凭据。`POST /_control` 接收 JSON，可调整 generation、mode、clock；`skew=true` 让元数据把 schema 分类指向另一次构建，`ghost=true` 让元数据描述一个地址并不存在的可选附件，两者都用于模拟目录更新中途的短暂不齐。控制端点只服务于本地演练，不是资料接口，也不是浏览器业务操作入口。每次重新启动服务都会恢复初始数据；生产接入时不部署此控制面。

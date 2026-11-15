@@ -35,8 +35,8 @@ export async function createProvider(port = 0) {
       if (url.pathname === '/_health' || url.pathname === '/health') result = json({ service: 'local-source', generation: state.generation });
       else if (url.pathname === '/_audit') result = json(audit);
       else if (url.pathname === '/_control' && request.method === 'POST') {
-        for (const key of ['generation', 'mode', 'clock']) if (payload[key] !== undefined) state[key] = payload[key];
-        result = json({ generation: state.generation, mode: state.mode, clock: state.clock });
+        for (const key of ['generation', 'mode', 'clock', 'skew', 'ghost']) if (payload[key] !== undefined) state[key] = payload[key];
+        result = json({ generation: state.generation, mode: state.mode, clock: state.clock, skew: state.skew, ghost: state.ghost });
       } else result = await routes({ request, url, body, payload, state, json, text, binary });
       result ??= json({ error: '资料不存在' }, 404);
       response.writeHead(result.status ?? 200, { 'cache-control': 'no-store', ...result.headers });

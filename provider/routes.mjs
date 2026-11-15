@@ -1,12 +1,14 @@
 import { createHash } from 'node:crypto';
-export const initialState = { generation: 1, mode: 'normal', clock: 1000 };
+export const initialState = { generation: 1, mode: 'normal', clock: 1000, skew: false, ghost: false };
 export async function stop(state) {  }
 export async function routes(context) {
  const { request, url, body, payload, state, json, text, binary } = context;
 
  const build=state.generation===1?'20261114.090000-1':'20261114.093000-2';
+ const other=state.generation===1?'20261114.093000-2':'20261114.090000-1';
+ const schemaBuild=state.skew?other:build;
  if(url.pathname==='/repository/metadata')return json({groupId:'local.devices',artifactId:'protocol',version:'1.2-SNAPSHOT',metadata:'/repository/local/devices/protocol/1.2-SNAPSHOT/maven-metadata.xml',required:[{extension:'zip',classifier:''},{extension:'xml',classifier:'schema'}],optional:[{extension:'txt',classifier:'notes'}]});
- if(url.pathname.endsWith('/maven-metadata.xml'))return text(`<metadata><groupId>local.devices</groupId><artifactId>protocol</artifactId><version>1.2-SNAPSHOT</version><versioning><snapshot><timestamp>${build.split('-')[0]}</timestamp><buildNumber>${state.generation}</buildNumber></snapshot><snapshotVersions><snapshotVersion><extension>zip</extension><value>1.2-${build}</value><updated>20261114093000</updated></snapshotVersion><snapshotVersion><classifier>schema</classifier><extension>xml</extension><value>1.2-${build}</value><updated>20261114093000</updated></snapshotVersion></snapshotVersions></versioning></metadata>`,200,{'content-type':'application/xml',etag:'"build-'+state.generation+'"'});
+ if(url.pathname.endsWith('/maven-metadata.xml'))return text(`<metadata><groupId>local.devices</groupId><artifactId>protocol</artifactId><version>1.2-SNAPSHOT</version><versioning><snapshot><timestamp>${build.split('-')[0]}</timestamp><buildNumber>${state.generation}</buildNumber></snapshot><snapshotVersions><snapshotVersion><extension>zip</extension><value>1.2-${build}</value><updated>20261114093000</updated></snapshotVersion><snapshotVersion><classifier>schema</classifier><extension>xml</extension><value>1.2-${schemaBuild}</value><updated>20261114093000</updated></snapshotVersion>${state.ghost?`<snapshotVersion><classifier>notes</classifier><extension>txt</extension><value>1.2-${build}</value><updated>20261114093000</updated></snapshotVersion>`:''}</snapshotVersions></versioning></metadata>`,200,{'content-type':'application/xml',etag:'"build-'+state.generation+'"'});
  if(url.pathname.includes('/protocol-1.2-')){
    if(!url.pathname.includes(build))return json({error:'此次构建文件已移走'},404);
    if(url.pathname.endsWith('-notes.txt'))return json({error:'没有发布可选说明'},404);
